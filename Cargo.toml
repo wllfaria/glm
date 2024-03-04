@@ -1,10 +1,8 @@
-[package]
-name = "glm"
-version = "0.1.0"
-edition = "2021"
+[workspace]
+members = ["crates/glm", "crates/tui"]
+default-members = ["crates/tui"]
+resolver = "2"
 
-[dependencies]
+[workspace.dependencies]
+glm = { path = "crates/glm" }
 anyhow = "1.0.80"
-
-[dev-dependencies]
-tempfile = "3.10.1"
