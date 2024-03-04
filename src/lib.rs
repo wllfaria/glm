@@ -1,2 +1,3 @@
-mod file_manager;
-mod item;
+pub fn main() {
+    let _message = "Hello, World!";
+}
