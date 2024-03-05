@@ -1,5 +1,6 @@
 mod app;
 mod cli;
+mod components;
 mod events;
 
 use std::io;
@@ -29,6 +30,11 @@ fn main() -> anyhow::Result<()> {
     terminal.clear()?;
 
     while app.is_running {
+        terminal.draw(|f| {
+            if app.draw(f).is_err() {
+                std::process::exit(1);
+            }
+        })?;
         match events.next()? {
             // TODO: probably not useful to quit on any event.
             Event::Key(_) => app.is_running = false,
