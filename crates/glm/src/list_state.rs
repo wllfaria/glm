@@ -2,8 +2,8 @@ use std::path::PathBuf;
 
 use crate::file_manager::Item;
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct ListState {
-    items: Vec<Item>,
-    current_dir: PathBuf,
+    pub items: Vec<Item>,
+    pub current_dir: PathBuf,
 }
