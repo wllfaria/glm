@@ -2,12 +2,22 @@ use std::path::Path;
 
 use crate::file_manager::FileType;
 
+/// A common interface for base file system operations.
+///
+/// FsOps serves as a common way to perform file system operations that are
+/// required by every variation of file managers, also requiring each
+/// variation to implement possible specific behavior.
+///
+/// Some functions here are platform specific, make sure to check the function
+/// for your operating system of interest.
 pub trait FsOps<S> {
-    fn change_dir<P>(&self, path: P) -> anyhow::Result<S>
+    /// Every file manager is required to implement this function. But every
+    /// file manager can behave different. Check specific implementation for
+    /// the file manager you need.
+    fn change_dir<P>(&mut self, path: P) -> anyhow::Result<&S>
     where
         P: AsRef<Path>;
 
-    #[cfg(unix)]
     /// Checks if a given path refers to a "hidden" file or directory on Unix-like systems.
     ///
     /// In Unix-like systems, a file is considered hidden if its name starts with
@@ -17,6 +27,7 @@ pub trait FsOps<S> {
     /// Returns `true` if the path refers to a hidden file or directory. Or false if the
     /// path does not follow the convention, or if any of the path processing fails.
     /// (e.g., if the file name cannot be converted to a string).
+    #[cfg(unix)]
     fn is_hidden<P>(&self, path: P) -> anyhow::Result<bool>
     where
         P: AsRef<Path>,
@@ -80,7 +91,6 @@ pub trait FsOps<S> {
     {
         let is_symlink = self.is_symlink(path.as_ref())?;
         let is_dir = self.is_dir(path.as_ref())?;
-        let is_file = self.is_file(path.as_ref())?;
         if is_symlink {
             Ok(FileType::Symlink)
         } else if is_dir {

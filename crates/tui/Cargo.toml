@@ -6,3 +6,7 @@ edition = "2021"
 [dependencies]
 glm.workspace = true
 anyhow.workspace = true
+tokio.workspace = true
+clap = { version = "4.5.1", features = ["derive"] }
+ratatui = { version = "0.26.1", features = ["crossterm"] }
+crossterm = "0.27.0"

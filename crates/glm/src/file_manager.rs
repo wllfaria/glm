@@ -33,7 +33,7 @@ pub struct FileManager<S> {
 }
 
 impl FsOps<ListState> for FileManager<ListState> {
-    fn change_dir<P>(&self, path: P) -> anyhow::Result<ListState>
+    fn change_dir<P>(&mut self, path: P) -> anyhow::Result<&ListState>
     where
         P: AsRef<Path>,
     {
@@ -63,7 +63,8 @@ impl FsOps<ListState> for FileManager<ListState> {
             current_dir: path.as_ref().to_path_buf(),
             items,
         };
-        Ok(new_state)
+        self.state = new_state;
+        Ok(&self.state)
     }
 }
 
@@ -76,11 +77,14 @@ impl FileManager<ListState> {
             state: ListState::default(),
         };
 
-        fm.state = fm.change_dir(path)?;
+        fm.change_dir(path)?;
 
         Ok(fm)
     }
 
+    /// Returns a immutable reference to the current state. mutating
+    /// the state is not directly allowed, in order to achieve mutation
+    /// use the specialized methods that mutate the state.
     pub fn get_state(&self) -> &ListState {
         &self.state
     }
