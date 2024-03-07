@@ -25,7 +25,7 @@ fn main() -> anyhow::Result<()> {
     let backend = CrosstermBackend::new(io::stdout());
     let mut terminal = Terminal::new(backend)?;
     let events = EventHandler::new(250);
-    let mut app = App::new(file_manager);
+    let mut app = App::new(file_manager, terminal.size()?);
 
     terminal.clear()?;
 
@@ -35,9 +35,9 @@ fn main() -> anyhow::Result<()> {
                 std::process::exit(1);
             }
         })?;
+        terminal.show_cursor()?;
         match events.next()? {
-            // TODO: probably not useful to quit on any event.
-            Event::Key(_) => app.is_running = false,
+            Event::Key(event) => app.handle_key_event(event)?,
         }
     }
 
