@@ -100,3 +100,78 @@ impl FileManager<TreeState> {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs::File;
+    use std::io::Write;
+    use tempfile::{tempdir, TempDir};
+
+    fn setup_tempdir() -> TempDir {
+        let dir = tempdir().expect("failed to create tempdir");
+
+        for i in 0..10 {
+            let file_name = i.to_string() + "tempfile.txt";
+            let file_path = dir.path().join(file_name);
+            let mut file = File::create(&file_path).expect("failed to create file");
+            writeln!(file, "Hello, World!").expect("failed to write to file");
+        }
+
+        for i in 10..20 {
+            let file_name = ".tempfile".to_owned() + &i.to_string() + ".txt";
+            let file_path = dir.path().join(file_name);
+            let mut file = File::create(&file_path).expect("failed to create file");
+            writeln!(file, "Hello, World!").expect("failed to write to file");
+        }
+        dir
+    }
+
+    fn make_sut() -> (TempDir, FileManager<ListState>) {
+        let dir = setup_tempdir();
+        let path = dir.path().to_path_buf();
+        (
+            dir,
+            FileManager::<ListState>::new(path).expect("failed to create file manager"),
+        )
+    }
+
+    #[test]
+    fn test_new_file_manager() {
+        let (dir, sut) = make_sut();
+
+        let state = sut.get_state();
+
+        assert_eq!(state.current_dir, dir.path());
+        assert_eq!(state.items.len(), 10);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn test_is_hidden() {
+        let (dir, sut) = make_sut();
+        let state = sut.get_state();
+        let not_hidden = &state.items[0].file_path;
+        let hidden = "/fake/hidden/.path";
+
+        let expect_true = sut.is_hidden(hidden).expect("failed to check filename");
+        let expect_false = sut.is_hidden(not_hidden).expect("failed to check filename");
+
+        assert!(expect_true);
+        assert!(!expect_false);
+    }
+
+    #[test]
+    fn test_is_file() {
+        let (dir, sut) = make_sut();
+
+        let state = sut.get_state();
+        let expect_true = sut
+            .is_file(&state.items[0].file_path)
+            .expect("failed to check filename");
+        let expect_false = sut.is_file(dir.path()).expect("failed to check tempdir");
+
+        assert!(expect_true);
+        assert!(!expect_false);
+    }
+}
