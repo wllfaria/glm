@@ -5,7 +5,7 @@ use crate::list_state::ListState;
 use crate::tree_state::TreeState;
 
 /// FileType of a given item, in which can be `Directory | File | Symlink`
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum FileType {
     Directory,
     File,
@@ -13,7 +13,7 @@ pub enum FileType {
 }
 
 /// `Item` is the representation of any contents of the filesystem.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Item {
     /// The basename of the item, the last component on the path
     pub file_name: String,
@@ -149,7 +149,7 @@ mod tests {
     #[cfg(unix)]
     #[test]
     fn test_is_hidden() {
-        let (dir, sut) = make_sut();
+        let (_, sut) = make_sut();
         let state = sut.get_state();
         let not_hidden = &state.items[0].file_path;
         let hidden = "/fake/hidden/.path";

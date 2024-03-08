@@ -1,7 +1,7 @@
 use glm::{FileManager, ListState};
 
 use crossterm::event::KeyEvent;
-use ratatui::layout::{Constraint, Layout, Rect};
+use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::Frame;
 
 use crate::components::{file_list::FileListComponent, Component};
@@ -14,12 +14,7 @@ pub struct App {
 
 impl App {
     pub fn new(file_manager: FileManager<ListState>, size: Rect) -> Self {
-        let list = file_manager
-            .get_state()
-            .items
-            .iter()
-            .map(|i| i.file_name.clone())
-            .collect();
+        let list = file_manager.get_state().items.clone();
 
         Self {
             is_running: true,
@@ -28,13 +23,14 @@ impl App {
     }
 
     pub fn draw(&mut self, f: &mut Frame) -> anyhow::Result<()> {
-        self.file_list.resize(f.size());
-        self.file_list.draw(
-            f,
-            Layout::default()
-                .constraints([Constraint::Percentage(100)])
-                .split(f.size())[0],
-        )?;
+        let layout = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints([Constraint::Length(4), Constraint::Fill(1)])
+            .split(f.size());
+        let _lines = layout[0];
+        let list = layout[1];
+        self.file_list.resize(list);
+        self.file_list.draw(f, list)?;
         Ok(())
     }
 
