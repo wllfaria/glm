@@ -5,6 +5,7 @@ mod tree;
 mod tree_state;
 
 pub use file_manager::FileManager;
-pub use file_manager::Item;
 pub use file_manager::FileType;
+pub use file_manager::Item;
 pub use list_state::ListState;
+pub use fs_ops::FsOps;

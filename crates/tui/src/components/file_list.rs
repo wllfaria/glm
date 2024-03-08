@@ -16,15 +16,21 @@ struct Position {
     pub y: u16,
 }
 
+#[derive(Debug, Clone)]
+pub struct ListItem {
+    pub display_name: String,
+    pub item: Item,
+}
+
 #[derive(Debug)]
 pub struct FileListComponent {
-    items: Vec<String>,
+    items: Vec<ListItem>,
     bounds: Rect,
     last_pos: Option<Position>,
     pos: Position,
 }
 
-fn format_names(items: Vec<Item>) -> Vec<String> {
+fn format_names(items: Vec<Item>) -> Vec<ListItem> {
     let mut items = items.clone();
     items.sort_by(|a, b| {
         match (
@@ -36,11 +42,18 @@ fn format_names(items: Vec<Item>) -> Vec<String> {
             _ => a.file_name.cmp(&b.file_name),
         }
     });
+
     items
         .iter()
-        .map(|item| match item.file_type {
-            FileType::Directory => item.file_name.clone() + "/",
-            _ => item.file_name.clone(),
+        .map(|item| {
+            let display_name = match item.file_type {
+                FileType::Directory => item.file_name.clone() + "/",
+                _ => item.file_name.clone(),
+            };
+            ListItem {
+                display_name,
+                item: item.clone(),
+            }
         })
         .collect()
 }
@@ -53,6 +66,14 @@ impl FileListComponent {
             bounds,
             items: format_names(items),
         }
+    }
+
+    pub fn update(&mut self, items: Vec<Item>) -> anyhow::Result<()> {
+        self.items = format_names(items);
+        self.pos = Position { x: 0, y: 0 };
+        self.last_pos = None;
+        self.draw_cursor()?;
+        Ok(())
     }
 
     pub fn resize(&mut self, bounds: Rect) {
@@ -68,13 +89,12 @@ impl FileListComponent {
     }
 
     fn constrain_to_line(&mut self) {
-        let line_len = self.get_line_under_cursor().len() as u16;
+        let line_len = self.get_line_under_cursor().display_name.len() as u16;
         self.pos.x = u16::min(self.pos.x, line_len - 1);
     }
 
-    fn get_line_under_cursor(&self) -> &str {
-        let y_as_list_index = self.pos.y;
-        &self.items[y_as_list_index as usize]
+    pub fn get_line_under_cursor(&self) -> &ListItem {
+        &self.items[self.pos.y as usize]
     }
 
     fn is_separator(&self, c: char) -> bool {
@@ -91,7 +111,7 @@ impl FileListComponent {
     }
 
     fn skip_to_separator(&mut self) {
-        let line = self.get_line_under_cursor();
+        let line = &self.get_line_under_cursor().display_name;
         let char_at_cursor = line
             .chars()
             .nth(self.pos.x.into())
@@ -141,13 +161,14 @@ impl FileListComponent {
     }
 
     fn move_cursor_to_line_end(&mut self) -> anyhow::Result<()> {
-        let line_len = self.get_line_under_cursor().len() as u16;
+        let line_len = self.get_line_under_cursor().display_name.len() as u16;
         self.pos.x = line_len - 1;
         Ok(())
     }
 
     fn move_cursor_to_next_word(&mut self) -> anyhow::Result<()> {
-        let should_go_down = self.pos.x as usize == self.get_line_under_cursor().len() - 1;
+        let item_len = self.get_line_under_cursor().display_name.len() - 1;
+        let should_go_down = self.pos.x as usize == item_len;
 
         if should_go_down {
             self.skip_to_next_line();
@@ -162,7 +183,8 @@ impl FileListComponent {
 
 impl Component for FileListComponent {
     fn draw(&mut self, f: &mut Frame, area: Rect) -> anyhow::Result<()> {
-        f.render_widget(List::new(self.items.to_vec()), area);
+        let list = self.items.iter().map(|i| i.display_name.clone());
+        f.render_widget(List::new(list), area);
         Ok(())
     }
 
@@ -175,7 +197,6 @@ impl Component for FileListComponent {
             KeyCode::Char('0') => self.move_cursor_to_line_start()?,
             KeyCode::Char('$') => self.move_cursor_to_line_end()?,
             KeyCode::Char('w') => self.move_cursor_to_next_word()?,
-            KeyCode::Char('q') => todo!(),
             _ => (),
         }
         self.draw_cursor()?;
@@ -220,7 +241,7 @@ mod tests {
     fn test_get_line_under_cursor() {
         let sut = make_sut(1);
 
-        let line = sut.get_line_under_cursor();
+        let line = &sut.get_line_under_cursor().display_name;
 
         assert_eq!(line, "0 Hello, World!");
     }

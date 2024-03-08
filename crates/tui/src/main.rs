@@ -25,7 +25,7 @@ fn main() -> anyhow::Result<()> {
     let backend = CrosstermBackend::new(io::stdout());
     let mut terminal = Terminal::new(backend)?;
     let events = EventHandler::new(250);
-    let mut app = App::new(file_manager, terminal.size()?);
+    let mut app = App::new(file_manager, terminal.size()?)?;
 
     terminal.clear()?;
 
