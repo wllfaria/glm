@@ -1,11 +1,12 @@
 use std::sync::mpsc;
 use std::thread;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 
 use crossterm::event::KeyEvent;
 use crossterm::event::{self, Event as CrosstermEvent};
 
 pub enum Event {
+    Tick,
     Key(KeyEvent),
 }
 
@@ -31,7 +32,9 @@ impl EventHandler {
         let (tx, rx) = mpsc::channel();
         {
             let sender = tx.clone();
-            thread::spawn(move || loop {
+            thread::spawn(move ||  {
+            let mut last_tick = Instant::now();
+                loop {
                 if event::poll(tick_rate).expect("failed to poll events") {
                     match event::read().expect("unable to read events") {
                         CrosstermEvent::Key(e) => sender.send(Event::Key(e)),
@@ -39,7 +42,12 @@ impl EventHandler {
                     }
                     .expect("failed to send terminal event")
                 }
-            });
+
+                if last_tick.elapsed() >= tick_rate {
+                    sender.send(Event::Tick).expect("unable to send tick event");
+                    last_tick = Instant::now();
+                }
+            }});
         }
         Self { _tx: tx, rx }
     }

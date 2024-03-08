@@ -12,13 +12,19 @@ use crate::components::Component;
 pub struct FileListComponent {
     items: Vec<String>,
     bounds: Rect,
+    last_x: u16,
+    last_y: u16,
     y: u16,
     x: u16,
 }
 
 impl FileListComponent {
     pub fn new(items: Vec<String>, bounds: Rect) -> Self {
+        // HACK: we are starting last_x,y as different values so it fixes
+        // on first render
         Self {
+            last_x: 1,
+            last_y: 1,
             x: 0,
             y: 0,
             bounds,
@@ -31,6 +37,8 @@ impl FileListComponent {
     }
 
     fn draw_cursor(&mut self) -> anyhow::Result<()> {
+        self.last_x = self.x;
+        self.last_y = self.y;
         crossterm::execute!(io::stdout(), MoveTo(self.x, self.y))?;
         Ok(())
     }
@@ -149,6 +157,14 @@ impl Component for FileListComponent {
             _ => (),
         }
         self.draw_cursor()?;
+        Ok(())
+    }
+
+    fn tick(&mut self) -> anyhow::Result<()> {
+        match (self.last_x == self.x, self.last_y == self.y) {
+            (true, true) => (),
+            _ => self.draw_cursor()?,
+        }
         Ok(())
     }
 }

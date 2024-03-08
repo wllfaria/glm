@@ -42,4 +42,9 @@ impl App {
         self.file_list.handle_key_event(event)?;
         Ok(())
     }
+
+    pub fn tick(&mut self) -> anyhow::Result<()> {
+        self.file_list.tick()?;
+        Ok(())
+    }
 }
