@@ -75,6 +75,15 @@ impl Component for FileListComponent {
                 self.constrain_to_line();
                 self.draw_cursor()?;
             }
+            KeyCode::Char('0') => {
+                self.x = self.bounds.x;
+                self.draw_cursor()?;
+            }
+            KeyCode::Char('$') => {
+                let line_len = self.get_line_under_cursor().len() as u16;
+                self.x = line_len - 1;
+                self.draw_cursor()?;
+            }
             KeyCode::Char('q') => todo!(),
             _ => (),
         }
