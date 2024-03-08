@@ -243,7 +243,7 @@ mod tests {
 
         let line = &sut.get_line_under_cursor().display_name;
 
-        assert_eq!(line, "0 Hello, World!");
+        assert_eq!(line, "0hello_world");
     }
 
     #[test]
@@ -280,7 +280,7 @@ mod tests {
             _ = sut.move_cursor_right();
         }
 
-        assert_eq!(sut.pos.x, 14);
+        assert_eq!(sut.pos.x, 11);
     }
 
     #[test]
@@ -301,10 +301,10 @@ mod tests {
         let mut sut = make_sut(2);
 
         // should go to the first character of second line.
-        // 0 Hello, World!
-        //  ^^     ^^    ^
-        // These are the separatos it should stop. the 6th move to next line
-        for _ in 0..6 {
+        // 0hello_world
+        //       ^^   ^
+        // These are the separators it should stop. the 4th move to next line
+        for _ in 0..4 {
             _ = sut.move_cursor_to_next_word();
         }
 
@@ -328,6 +328,52 @@ mod tests {
 
         _ = sut.move_cursor_to_line_end();
 
-        assert_eq!(sut.pos.x, 14);
+        assert_eq!(sut.pos.x, 11);
+    }
+
+    #[test]
+    fn test_sort_correctly() {
+        let mut lines = vec![];
+        lines.push(Item {
+            is_hidden: false,
+            file_type: FileType::File,
+            file_ext: Some(".txt".into()),
+            file_name: String::from("6hello_world"),
+            file_path: PathBuf::new(),
+        });
+        for i in 0..3 {
+            lines.push(Item {
+                is_hidden: false,
+                file_type: FileType::File,
+                file_ext: Some(".txt".into()),
+                file_name: i.to_string() + "hello_world",
+                file_path: PathBuf::new(),
+            });
+        }
+        for i in 3..6 {
+            lines.push(Item {
+                is_hidden: false,
+                file_type: FileType::Directory,
+                file_ext: Some(".txt".into()),
+                file_name: i.to_string() + "hello_world",
+                file_path: PathBuf::new(),
+            });
+        }
+        let area = Rect::new(10, 10, 10, 10);
+        let sut = FileListComponent::new(lines, area);
+
+        let items = sut.items;
+
+        assert_eq!(items.len(), 7);
+        assert_eq!(items[0].item.file_type, FileType::Directory);
+        assert_eq!(items[1].item.file_type, FileType::Directory);
+        assert_eq!(items[2].item.file_type, FileType::Directory);
+        assert_eq!(items[0].display_name, "3hello_world/");
+        assert_eq!(items[3].display_name, "0hello_world");
+        assert_eq!(items[4].item.file_type, FileType::File);
+        assert_eq!(items[5].item.file_type, FileType::File);
+        assert_eq!(items[5].display_name, "2hello_world");
+        assert_eq!(items[6].item.file_type, FileType::File);
+        assert_eq!(items[6].display_name, "6hello_world");
     }
 }
