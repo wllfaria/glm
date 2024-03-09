@@ -35,10 +35,10 @@ fn main() -> anyhow::Result<()> {
                 std::process::exit(1);
             }
         })?;
+        app.update_cursor()?;
         terminal.show_cursor()?;
         match events.next()? {
             Event::Key(event) => app.handle_key_event(event)?,
-            Event::Tick => app.tick()?,
         }
     }
 

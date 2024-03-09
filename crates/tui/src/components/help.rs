@@ -21,7 +21,7 @@ impl Component for HelpComponent {
         f: &mut ratatui::prelude::Frame,
         area: ratatui::prelude::Rect,
     ) -> anyhow::Result<()> {
-        let lines = vec![Line::from("test".gray())];
+        let lines = vec![Line::from("this will eventually be help!".gray())];
 
         let help = Paragraph::new(lines).block(
             Block::new()

@@ -35,6 +35,11 @@ impl App {
         })
     }
 
+    pub fn update_cursor(&mut self) -> anyhow::Result<()> {
+        self.file_list.draw_cursor()?;
+        Ok(())
+    }
+
     pub fn draw(&mut self, f: &mut Frame) -> anyhow::Result<()> {
         let bottom_pane_size = if self.should_open_bottom_pane() {
             Constraint::Length(10)

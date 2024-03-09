@@ -77,7 +77,7 @@ impl FileListComponent {
         Ok(())
     }
 
-    fn draw_cursor(&mut self) -> anyhow::Result<()> {
+    pub fn draw_cursor(&mut self) -> anyhow::Result<()> {
         self.last_pos = Some(self.pos.clone());
         let x = self.pos.x + self.bounds.x;
         let y = self.pos.y + self.bounds.y;
