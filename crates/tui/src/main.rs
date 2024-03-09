@@ -29,6 +29,7 @@ fn main() -> anyhow::Result<()> {
     terminal.clear()?;
 
     while app.is_running {
+        terminal.hide_cursor()?;
         terminal.draw(|f| {
             if app.draw(f).is_err() {
                 std::process::exit(1);

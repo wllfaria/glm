@@ -1,4 +1,4 @@
-use ratatui::{layout::Rect, widgets::List, Frame};
+use ratatui::{layout::Rect, style::Stylize, text::Span, widgets::List, Frame};
 
 use super::Component;
 
@@ -16,13 +16,17 @@ impl LineNumbersComponent {
         }
     }
 
-    fn compose_list(&self) -> Vec<String> {
+    pub fn update(&mut self, total_lines: usize) {
+        self.total_lines = total_lines;
+    }
+
+    fn compose_list(&self) -> Vec<Span> {
         let mut lines = vec![];
         for i in 0..self.bounds.height as usize {
             if i < self.total_lines {
                 let line = (i + 1).to_string();
                 let line = format!("{}{}", " ".repeat(3 - line.len()), line);
-                lines.push(line);
+                lines.push(line.gray().dim());
                 continue;
             }
             lines.push("~".into());
@@ -37,7 +41,7 @@ impl Component for LineNumbersComponent {
         Ok(())
     }
     fn resize(&mut self, size: Rect) {
-        self.bounds = size
+        self.bounds = size;
     }
     fn tick(&mut self) -> anyhow::Result<()> {
         Ok(())

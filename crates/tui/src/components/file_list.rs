@@ -5,6 +5,7 @@ use std::io;
 use crossterm::cursor::MoveTo;
 use crossterm::event::{KeyCode, KeyEvent};
 use ratatui::layout::Rect;
+use ratatui::style::Stylize;
 use ratatui::widgets::List;
 use ratatui::Frame;
 
@@ -179,8 +180,16 @@ impl FileListComponent {
 
 impl Component for FileListComponent {
     fn draw(&mut self, f: &mut Frame, area: Rect) -> anyhow::Result<()> {
-        let list = self.items.iter().map(|i| i.display_name.clone());
+        let list = self
+            .items
+            .iter()
+            .map(|i| match i.item.file_type {
+                FileType::Directory => i.display_name.clone().yellow().bold(),
+                _ => i.display_name.clone().blue().dim(),
+            })
+            .collect::<Vec<_>>();
         f.render_widget(List::new(list), area);
+        self.draw_cursor()?;
         Ok(())
     }
 

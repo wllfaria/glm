@@ -1,9 +1,13 @@
 use glm::{FileManager, FileType, FsOps, ListState};
 
 use crossterm::event::{KeyCode, KeyEvent};
-use ratatui::layout::{Constraint, Direction, Layout, Rect};
+use ratatui::layout::{Constraint, Layout, Rect};
+use ratatui::style::Stylize;
+use ratatui::text::Line;
+use ratatui::widgets::{Block, Borders, Padding, Paragraph, Wrap};
 use ratatui::Frame;
 
+use crate::components::help::HelpComponent;
 use crate::components::line_numbers::LineNumbersComponent;
 use crate::components::{file_list::FileListComponent, Component};
 
@@ -12,6 +16,7 @@ pub struct App {
     file_list: FileListComponent,
     file_manager: FileManager<ListState>,
     line_numbers: LineNumbersComponent,
+    help_pane: HelpComponent,
     is_help_open: bool,
     pub is_running: bool,
 }
@@ -26,6 +31,7 @@ impl App {
             is_help_open: false,
             line_numbers: LineNumbersComponent::new(list.len(), size),
             file_list: FileListComponent::new(list, size),
+            help_pane: HelpComponent::new(),
         })
     }
 
@@ -35,7 +41,7 @@ impl App {
         } else {
             Constraint::Length(0)
         };
-        let page = Layout::vertical([Constraint::Length(1), Constraint::Fill(1), bottom_pane_size])
+        let page = Layout::vertical([Constraint::Length(2), Constraint::Fill(1), bottom_pane_size])
             .split(f.size());
 
         let header = Layout::vertical([Constraint::Fill(1)]).split(page[0]);
@@ -46,11 +52,34 @@ impl App {
         let line_numbers = body[0];
         let list = body[1];
 
+        self.draw_hint(f, header[0])?;
+
+        if self.should_open_bottom_pane() {
+            self.help_pane.draw(f, footer[0])?;
+        }
+
         self.file_list.resize(list);
         self.line_numbers.resize(line_numbers);
-
         self.line_numbers.draw(f, line_numbers)?;
         self.file_list.draw(f, list)?;
+        Ok(())
+    }
+
+    fn draw_hint(&self, f: &mut Frame, area: Rect) -> anyhow::Result<()> {
+        let text = Line::from(
+            "Welcome to Glm v0.1.0, press `?` to see help, press "
+                .gray()
+                .dim(),
+        );
+        let p = Paragraph::new(text)
+            .block(
+                Block::new()
+                    .borders(Borders::BOTTOM)
+                    .padding(Padding::left(4)),
+            )
+            .wrap(Wrap { trim: true });
+
+        f.render_widget(p, area);
         Ok(())
     }
 
@@ -63,6 +92,7 @@ impl App {
         match list_item.item.file_type {
             FileType::Directory => {
                 let new_state = self.file_manager.change_dir(&list_item.item.file_path)?;
+                self.line_numbers.update(new_state.items.len());
                 self.file_list.update(new_state.items.clone())?;
             }
             _ => todo!(), // TODO: we should open the file here
@@ -74,6 +104,7 @@ impl App {
         let path = self.file_manager.get_state().current_dir.clone();
         if let Some(parent) = path.parent() {
             let new_state = self.file_manager.change_dir(parent)?;
+            self.line_numbers.update(new_state.items.len());
             self.file_list.update(new_state.items.clone())?;
         }
         Ok(())
