@@ -36,7 +36,7 @@ impl App {
         Ok(())
     }
 
-    pub fn select_current_item(&mut self) -> anyhow::Result<()> {
+    fn select_current_item(&mut self) -> anyhow::Result<()> {
         let list_item = self.file_list.get_line_under_cursor();
         match list_item.item.file_type {
             FileType::Directory => {
@@ -48,10 +48,20 @@ impl App {
         Ok(())
     }
 
+    fn change_to_parent(&mut self) -> anyhow::Result<()> {
+        let path = self.file_manager.get_state().current_dir.clone();
+        if let Some(parent) = path.parent() {
+            let new_state = self.file_manager.change_dir(parent)?;
+            self.file_list.update(new_state.items.clone())?;
+        }
+        Ok(())
+    }
+
     pub fn handle_key_event(&mut self, event: KeyEvent) -> anyhow::Result<()> {
         match event.code {
             KeyCode::Enter => self.select_current_item()?,
             KeyCode::Char('q') => self.is_running = false,
+            KeyCode::Char('-') => self.change_to_parent()?,
             _ => self.file_list.handle_key_event(event)?,
         }
 

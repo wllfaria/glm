@@ -111,4 +111,3 @@ pub trait FsOps<S> {
             .map(|ext| ext.to_string_lossy().to_string())
     }
 }
-

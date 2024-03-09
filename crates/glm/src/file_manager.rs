@@ -1,3 +1,4 @@
+use path_absolutize::*;
 use std::path::{Path, PathBuf};
 
 use crate::fs_ops::FsOps;
@@ -38,7 +39,8 @@ impl FsOps<ListState> for FileManager<ListState> {
         P: AsRef<Path>,
     {
         let mut items = vec![];
-        for entry in std::fs::read_dir(path.as_ref())? {
+        let path = path.as_ref().absolutize().unwrap();
+        for entry in std::fs::read_dir(path.clone())? {
             let entry = entry?;
             let is_hidden = self.is_hidden(entry.path())?;
             // TODO: we should not just skip hidden files, but rather show/hide
@@ -46,6 +48,7 @@ impl FsOps<ListState> for FileManager<ListState> {
             if is_hidden {
                 continue;
             }
+
             let file_name = entry.file_name().to_string_lossy().to_string();
             let file_path = entry.path();
             let file_type = self.get_file_type(entry.path())?;
@@ -59,6 +62,7 @@ impl FsOps<ListState> for FileManager<ListState> {
             };
             items.push(item);
         }
+
         let new_state = ListState {
             current_dir: path.as_ref().to_path_buf(),
             items,

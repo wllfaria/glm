@@ -6,6 +6,7 @@ edition = "2021"
 
 [dependencies]
 anyhow.workspace = true
+path-absolutize = "3.1.1"
 
 [dev-dependencies]
 tempfile = "3.10.1"
