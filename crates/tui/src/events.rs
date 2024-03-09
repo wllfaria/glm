@@ -32,22 +32,23 @@ impl EventHandler {
         let (tx, rx) = mpsc::channel();
         {
             let sender = tx.clone();
-            thread::spawn(move ||  {
-            let mut last_tick = Instant::now();
+            thread::spawn(move || {
+                let mut last_tick = Instant::now();
                 loop {
-                if event::poll(tick_rate).expect("failed to poll events") {
-                    match event::read().expect("unable to read events") {
-                        CrosstermEvent::Key(e) => sender.send(Event::Key(e)),
-                        _ => unimplemented!(),
+                    if event::poll(tick_rate).expect("failed to poll events") {
+                        match event::read().expect("unable to read events") {
+                            CrosstermEvent::Key(e) => sender.send(Event::Key(e)),
+                            _ => unimplemented!(),
+                        }
+                        .expect("failed to send terminal event")
                     }
-                    .expect("failed to send terminal event")
-                }
 
-                if last_tick.elapsed() >= tick_rate {
-                    sender.send(Event::Tick).expect("unable to send tick event");
-                    last_tick = Instant::now();
+                    if last_tick.elapsed() >= tick_rate {
+                        sender.send(Event::Tick).expect("unable to send tick event");
+                        last_tick = Instant::now();
+                    }
                 }
-            }});
+            });
         }
         Self { _tx: tx, rx }
     }

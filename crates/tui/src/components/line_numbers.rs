@@ -36,6 +36,9 @@ impl Component for LineNumbersComponent {
         f.render_widget(List::new(self.compose_list()), area);
         Ok(())
     }
+    fn resize(&mut self, size: Rect) {
+        self.bounds = size
+    }
     fn tick(&mut self) -> anyhow::Result<()> {
         Ok(())
     }

@@ -8,4 +8,5 @@ pub trait Component {
     fn draw(&mut self, f: &mut Frame, area: Rect) -> anyhow::Result<()>;
     fn tick(&mut self) -> anyhow::Result<()>;
     fn handle_key_event(&mut self, event: KeyEvent) -> anyhow::Result<()>;
+    fn resize(&mut self, size: Rect);
 }

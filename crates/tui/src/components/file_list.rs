@@ -76,10 +76,6 @@ impl FileListComponent {
         Ok(())
     }
 
-    pub fn resize(&mut self, bounds: Rect) {
-        self.bounds = bounds;
-    }
-
     fn draw_cursor(&mut self) -> anyhow::Result<()> {
         self.last_pos = Some(self.pos.clone());
         let x = self.pos.x + self.bounds.x;
@@ -186,6 +182,10 @@ impl Component for FileListComponent {
         let list = self.items.iter().map(|i| i.display_name.clone());
         f.render_widget(List::new(list), area);
         Ok(())
+    }
+
+    fn resize(&mut self, bounds: Rect) {
+        self.bounds = bounds;
     }
 
     fn handle_key_event(&mut self, event: KeyEvent) -> anyhow::Result<()> {
