@@ -11,7 +11,6 @@ use events::{Event, EventHandler};
 use glm::{FileManager, ListState};
 
 use crossterm::event::DisableMouseCapture;
-use crossterm::event::EnableMouseCapture;
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use crossterm::terminal::{EnterAlternateScreen, LeaveAlternateScreen};
 use ratatui::{backend::CrosstermBackend, Terminal};
@@ -49,7 +48,7 @@ fn main() -> anyhow::Result<()> {
 
 fn setup_terminal() -> anyhow::Result<()> {
     enable_raw_mode()?;
-    crossterm::execute!(io::stdout(), EnterAlternateScreen, EnableMouseCapture)?;
+    crossterm::execute!(io::stdout(), EnterAlternateScreen)?;
 
     let panic_hook = panic::take_hook();
     panic::set_hook(Box::new(move |panic| {

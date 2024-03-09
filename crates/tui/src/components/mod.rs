@@ -1,4 +1,5 @@
 pub mod file_list;
+pub mod line_numbers;
 
 use crossterm::event::KeyEvent;
 use ratatui::{layout::Rect, Frame};

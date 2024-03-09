@@ -4,12 +4,14 @@ use crossterm::event::{KeyCode, KeyEvent};
 use ratatui::layout::{Constraint, Direction, Layout, Rect};
 use ratatui::Frame;
 
+use crate::components::line_numbers::LineNumbersComponent;
 use crate::components::{file_list::FileListComponent, Component};
 
 #[derive(Debug)]
 pub struct App {
     file_list: FileListComponent,
     file_manager: FileManager<ListState>,
+    line_numbers: LineNumbersComponent,
     pub is_running: bool,
 }
 
@@ -20,6 +22,7 @@ impl App {
         Ok(Self {
             is_running: true,
             file_manager,
+            line_numbers: LineNumbersComponent::new(list.len(), size),
             file_list: FileListComponent::new(list, size),
         })
     }
@@ -29,8 +32,9 @@ impl App {
             .direction(Direction::Horizontal)
             .constraints([Constraint::Length(4), Constraint::Fill(1)])
             .split(f.size());
-        let _lines = layout[0];
+        let line_numbers = layout[0];
         let list = layout[1];
+        self.line_numbers.draw(f, line_numbers)?;
         self.file_list.resize(list);
         self.file_list.draw(f, list)?;
         Ok(())
