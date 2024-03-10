@@ -10,7 +10,6 @@ use app::App;
 use events::{Event, EventHandler};
 use glm::{FileManager, ListState};
 
-use crossterm::event::DisableMouseCapture;
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use crossterm::terminal::{EnterAlternateScreen, LeaveAlternateScreen};
 use ratatui::{backend::CrosstermBackend, Terminal};
@@ -61,6 +60,6 @@ fn setup_terminal() -> anyhow::Result<()> {
 
 fn reset_terminal() -> anyhow::Result<()> {
     disable_raw_mode()?;
-    crossterm::execute!(io::stdout(), LeaveAlternateScreen, DisableMouseCapture)?;
+    crossterm::execute!(io::stdout(), LeaveAlternateScreen)?;
     Ok(())
 }

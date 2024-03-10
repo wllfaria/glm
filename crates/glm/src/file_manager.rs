@@ -31,6 +31,7 @@ pub struct Item {
 #[derive(Debug)]
 pub struct FileManager<S> {
     state: S,
+    show_hidden: bool,
 }
 
 impl FsOps<ListState> for FileManager<ListState> {
@@ -43,9 +44,8 @@ impl FsOps<ListState> for FileManager<ListState> {
         for entry in std::fs::read_dir(path.clone())? {
             let entry = entry?;
             let is_hidden = self.is_hidden(entry.path())?;
-            // TODO: we should not just skip hidden files, but rather show/hide
-            // based on a dynamic setting
-            if is_hidden {
+
+            if let (true, false) = (is_hidden, self.show_hidden) {
                 continue;
             }
 
@@ -79,6 +79,7 @@ impl FileManager<ListState> {
     {
         let mut fm = FileManager {
             state: ListState::default(),
+            show_hidden: false,
         };
 
         fm.change_dir(path)?;
@@ -92,6 +93,11 @@ impl FileManager<ListState> {
     pub fn get_state(&self) -> &ListState {
         &self.state
     }
+
+    pub fn toggle_hidden(&mut self) -> anyhow::Result<&ListState> {
+        self.show_hidden = !self.show_hidden;
+        self.change_dir(self.state.current_dir.clone())
+    }
 }
 
 impl FileManager<TreeState> {
@@ -101,6 +107,7 @@ impl FileManager<TreeState> {
     {
         Ok(FileManager {
             state: TreeState::default(),
+            show_hidden: false,
         })
     }
 }

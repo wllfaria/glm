@@ -7,7 +7,11 @@ use ratatui::{layout::Rect, Frame};
 
 pub trait Component {
     fn draw(&mut self, f: &mut Frame, area: Rect) -> anyhow::Result<()>;
-    fn tick(&mut self) -> anyhow::Result<()>;
-    fn handle_key_event(&mut self, event: KeyEvent) -> anyhow::Result<()>;
-    fn resize(&mut self, size: Rect);
+    fn tick(&mut self) -> anyhow::Result<()> {
+        Ok(())
+    }
+    fn handle_key_event(&mut self, _event: KeyEvent) -> anyhow::Result<()> {
+        Ok(())
+    }
+    fn resize(&mut self, _size: Rect) {}
 }

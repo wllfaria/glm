@@ -29,7 +29,7 @@ impl LineNumbersComponent {
                 lines.push(line.gray().dim());
                 continue;
             }
-            lines.push("~".into());
+            lines.push("~".magenta().dim());
         }
         lines
     }
@@ -42,11 +42,5 @@ impl Component for LineNumbersComponent {
     }
     fn resize(&mut self, size: Rect) {
         self.bounds = size;
-    }
-    fn tick(&mut self) -> anyhow::Result<()> {
-        Ok(())
-    }
-    fn handle_key_event(&mut self, event: crossterm::event::KeyEvent) -> anyhow::Result<()> {
-        Ok(())
     }
 }

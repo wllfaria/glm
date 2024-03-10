@@ -119,20 +119,24 @@ impl App {
         self.is_help_open = !self.is_help_open;
     }
 
+    fn toggle_hidden(&mut self) -> anyhow::Result<()> {
+        self.file_manager.toggle_hidden()?;
+        let items = self.file_manager.get_state().items.to_vec();
+        self.line_numbers.update(items.len());
+        self.file_list.update(items)?;
+        Ok(())
+    }
+
     pub fn handle_key_event(&mut self, event: KeyEvent) -> anyhow::Result<()> {
         match event.code {
             KeyCode::Enter => self.select_current_item()?,
             KeyCode::Char('q') => self.is_running = false,
             KeyCode::Char('-') => self.change_to_parent()?,
             KeyCode::Char('?') => self.toggle_help(),
+            KeyCode::Char('H') => self.toggle_hidden()?,
             _ => self.file_list.handle_key_event(event)?,
         }
 
-        Ok(())
-    }
-
-    pub fn tick(&mut self) -> anyhow::Result<()> {
-        self.file_list.tick()?;
         Ok(())
     }
 }
