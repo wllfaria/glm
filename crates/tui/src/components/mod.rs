@@ -13,5 +13,7 @@ pub trait Component {
     fn handle_key_event(&mut self, _event: KeyEvent) -> anyhow::Result<()> {
         Ok(())
     }
-    fn resize(&mut self, _size: Rect) {}
+    fn resize(&mut self, _size: Rect) -> anyhow::Result<()> {
+        Ok(())
+    }
 }

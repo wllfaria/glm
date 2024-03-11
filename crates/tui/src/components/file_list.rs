@@ -29,6 +29,7 @@ pub struct FileListComponent {
     bounds: Rect,
     last_pos: Option<Position>,
     pos: Position,
+    scroll: u16,
 }
 
 fn format_names(items: Vec<Item>) -> Vec<ListItem> {
@@ -65,6 +66,7 @@ impl FileListComponent {
             last_pos: None,
             pos: Position { x: 0, y: 0 },
             bounds,
+            scroll: 0,
             items: format_names(items),
         }
     }
@@ -134,14 +136,26 @@ impl FileListComponent {
     }
 
     fn move_cursor_down(&mut self) -> anyhow::Result<()> {
-        let max_y = self.items.len() as u16 - 1;
-        self.pos.y = u16::min(max_y, self.pos.y + 1);
+        let bound = self.bounds.height - 1;
+
+        if self.pos.y + self.scroll == self.items.len() as u16 - 1 {
+            return Ok(());
+        }
+
+        match self.pos.y {
+            y if y == bound => self.scroll += 1,
+            _ => self.pos.y += 1,
+        };
+
         self.constrain_to_line();
         Ok(())
     }
 
     fn move_cursor_up(&mut self) -> anyhow::Result<()> {
-        self.pos.y = self.pos.y.saturating_sub(1);
+        match self.pos.y {
+            0 => self.scroll = self.scroll.saturating_sub(1),
+            _ => self.pos.y -= 1,
+        };
         self.constrain_to_line();
         Ok(())
     }
@@ -183,6 +197,7 @@ impl Component for FileListComponent {
         let list = self
             .items
             .iter()
+            .skip(self.scroll as usize)
             .map(|i| match i.item.file_type {
                 FileType::Directory => i.display_name.clone().yellow().bold(),
                 _ => i.display_name.clone().blue().dim(),
@@ -193,16 +208,18 @@ impl Component for FileListComponent {
         Ok(())
     }
 
-    fn resize(&mut self, bounds: Rect) {
+    fn resize(&mut self, bounds: Rect) -> anyhow::Result<()> {
         self.bounds = bounds;
+        self.draw_cursor()?;
+        Ok(())
     }
 
     fn handle_key_event(&mut self, event: KeyEvent) -> anyhow::Result<()> {
         match event.code {
-            KeyCode::Char('h') => self.move_cursor_left()?,
-            KeyCode::Char('j') => self.move_cursor_down()?,
-            KeyCode::Char('k') => self.move_cursor_up()?,
-            KeyCode::Char('l') => self.move_cursor_right()?,
+            KeyCode::Char('h') | KeyCode::Left => self.move_cursor_left()?,
+            KeyCode::Char('j') | KeyCode::Down => self.move_cursor_down()?,
+            KeyCode::Char('k') | KeyCode::Up => self.move_cursor_up()?,
+            KeyCode::Char('l') | KeyCode::Right => self.move_cursor_right()?,
             KeyCode::Char('0') => self.move_cursor_to_line_start()?,
             KeyCode::Char('$') => self.move_cursor_to_line_end()?,
             KeyCode::Char('w') => self.move_cursor_to_next_word()?,

@@ -46,7 +46,7 @@ impl App {
         } else {
             Constraint::Length(0)
         };
-        let page = Layout::vertical([Constraint::Length(2), Constraint::Fill(1), bottom_pane_size])
+        let page = Layout::vertical([Constraint::Length(3), Constraint::Fill(1), bottom_pane_size])
             .split(f.size());
 
         let header = Layout::vertical([Constraint::Fill(1)]).split(page[0]);
@@ -63,19 +63,18 @@ impl App {
             self.help_pane.draw(f, footer[0])?;
         }
 
-        self.file_list.resize(list);
-        self.line_numbers.resize(line_numbers);
+        self.file_list.resize(list)?;
+        self.line_numbers.resize(line_numbers)?;
         self.line_numbers.draw(f, line_numbers)?;
         self.file_list.draw(f, list)?;
         Ok(())
     }
 
     fn draw_hint(&self, f: &mut Frame, area: Rect) -> anyhow::Result<()> {
-        let text = Line::from(
-            "Welcome to Glm v0.1.0, press `?` to see help, press "
-                .gray()
-                .dim(),
-        );
+        let text = vec![
+            Line::from("Welcome to Glm v0.1.0, use h,j,k,l to move".gray().dim()),
+            Line::from("Press `?` to see help".gray().dim()),
+        ];
         let p = Paragraph::new(text)
             .block(
                 Block::new()

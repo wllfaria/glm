@@ -40,7 +40,8 @@ impl Component for LineNumbersComponent {
         f.render_widget(List::new(self.compose_list()), area);
         Ok(())
     }
-    fn resize(&mut self, size: Rect) {
+    fn resize(&mut self, size: Rect) -> anyhow::Result<()> {
         self.bounds = size;
+        Ok(())
     }
 }

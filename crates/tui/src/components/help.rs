@@ -1,17 +1,36 @@
 use ratatui::{
+    layout::{Constraint, Layout},
     style::{Color, Style, Stylize},
-    text::{Line, Span},
-    widgets::{Block, Borders, Paragraph},
+    text::Line,
+    widgets::{Block, Borders, Padding, Paragraph},
 };
 
 use super::Component;
 
 #[derive(Debug)]
-pub struct HelpComponent {}
+pub struct HelpComponent {
+    keys: [Line<'static>; 5],
+    lines: [Line<'static>; 5],
+}
 
 impl HelpComponent {
     pub fn new() -> Self {
-        Self {}
+        Self {
+            keys: [
+                "-".into(),
+                "Enter".into(),
+                "q".into(),
+                "?".into(),
+                "H".into(),
+            ],
+            lines: [
+                "Move up to parent directory".into(),
+                "Open the entry under the cursor".into(),
+                "Quit glm".into(),
+                "Toggle this help pane".into(),
+                "Toggle hidden files".into(),
+            ],
+        }
     }
 }
 
@@ -21,39 +40,20 @@ impl Component for HelpComponent {
         f: &mut ratatui::prelude::Frame,
         area: ratatui::prelude::Rect,
     ) -> anyhow::Result<()> {
-        let lines = vec![
-            Line::from(vec![" -".red(), " Move up to parent directory".blue()]),
-            Line::from(vec![
-                " Enter".red(),
-                " Open the entry under the cursor".blue(),
-            ]),
-            Line::from(vec![" q".red(), " Quit glm".blue()]),
-            Line::from(vec![" ?".red(), " Toggle this help pane".blue()]),
-            Line::from(vec![" H".red(), " Toggle hidden files".blue()]),
-        ];
+        let help_block = Block::new()
+            .borders(Borders::TOP)
+            .border_style(Style::new().fg(Color::Gray))
+            .padding(Padding::left(1));
 
-        // _       Open oil in Neovim's current working directory
-        // gs      Change the sort order
-        // gx      Open the entry under the cursor in an external program
-        // g.      Toggle hidden files and directories
-        // <CR>    Open the entry under the cursor
-        // <C-p>   Open the entry under the cursor in a preview window, or close the preview window if already open
-        // <C-t>   Open the entry under the cursor in a new tab
-        // -       Navigate to the parent path
-        // <C-c>   Close oil and restore original buffer
-        // g?      Show default keymaps
-        // g\      Jump to and from the trash for the current directory
-        // `       :cd to the current oil directory
-        // <C-h>   Open the entry under the cursor in a horizontal split
-        // <C-s>   Open the entry under the cursor in a vertical split
-        // ~       :tcd to the current oil directory
-        // <C-l>   Refresh current directory list
-        let help = Paragraph::new(lines).block(
-            Block::new()
-                .borders(Borders::TOP)
-                .border_style(Style::new().fg(Color::Gray)),
-        );
-        f.render_widget(help, area);
+        let keys = Paragraph::new(self.keys.to_vec())
+            .red()
+            .block(help_block.clone());
+        let lines = Paragraph::new(self.lines.to_vec()).blue().block(help_block);
+
+        let layout = Layout::horizontal([Constraint::Length(6), Constraint::Fill(1)]).split(area);
+
+        f.render_widget(keys, layout[0]);
+        f.render_widget(lines, layout[1]);
         Ok(())
     }
 }
