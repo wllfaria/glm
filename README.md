@@ -2,6 +2,8 @@
 
 <h1>Glyph File Manager</h1>
 
+<img src="./.github/images/glm-showcase.png" />
+
 Lightweight File Manager written in Rust that comes with a TUI.
 
 </div>
