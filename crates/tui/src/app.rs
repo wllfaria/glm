@@ -1,4 +1,4 @@
-use glm::{FileManager, FileType, FsOps, ListState};
+use glm::{FileManager, FileType, FsOps};
 
 use crossterm::event::{KeyCode, KeyEvent};
 use ratatui::layout::{Constraint, Layout, Rect};
@@ -14,7 +14,7 @@ use crate::components::{file_list::FileListComponent, Component};
 #[derive(Debug)]
 pub struct App {
     file_list: FileListComponent,
-    file_manager: FileManager<ListState>,
+    file_manager: FileManager,
     line_numbers: LineNumbersComponent,
     help_pane: HelpComponent,
     is_help_open: bool,
@@ -22,7 +22,7 @@ pub struct App {
 }
 
 impl App {
-    pub fn new(file_manager: FileManager<ListState>, size: Rect) -> anyhow::Result<Self> {
+    pub fn new(file_manager: FileManager, size: Rect) -> anyhow::Result<Self> {
         let list = file_manager.get_state().items.clone();
 
         Ok(Self {

@@ -3,7 +3,6 @@ use std::path::{Path, PathBuf};
 
 use crate::fs_ops::FsOps;
 use crate::list_state::ListState;
-use crate::tree_state::TreeState;
 
 /// FileType of a given item, in which can be `Directory | File | Symlink`
 #[derive(Debug, Clone, PartialEq)]
@@ -29,12 +28,12 @@ pub struct Item {
 }
 
 #[derive(Debug)]
-pub struct FileManager<S> {
-    state: S,
+pub struct FileManager {
+    state: ListState,
     show_hidden: bool,
 }
 
-impl FsOps<ListState> for FileManager<ListState> {
+impl FsOps<ListState> for FileManager {
     fn change_dir<P>(&mut self, path: P) -> anyhow::Result<&ListState>
     where
         P: AsRef<Path>,
@@ -72,8 +71,8 @@ impl FsOps<ListState> for FileManager<ListState> {
     }
 }
 
-impl FileManager<ListState> {
-    pub fn new<T>(path: T) -> anyhow::Result<FileManager<ListState>>
+impl FileManager {
+    pub fn new<T>(path: T) -> anyhow::Result<FileManager>
     where
         T: AsRef<Path>,
     {
@@ -97,18 +96,6 @@ impl FileManager<ListState> {
     pub fn toggle_hidden(&mut self) -> anyhow::Result<&ListState> {
         self.show_hidden = !self.show_hidden;
         self.change_dir(self.state.current_dir.clone())
-    }
-}
-
-impl FileManager<TreeState> {
-    pub fn new<T>(_: T) -> anyhow::Result<FileManager<TreeState>>
-    where
-        T: AsRef<Path>,
-    {
-        Ok(FileManager {
-            state: TreeState::default(),
-            show_hidden: false,
-        })
     }
 }
 
@@ -138,12 +125,12 @@ mod tests {
         dir
     }
 
-    fn make_sut() -> (TempDir, FileManager<ListState>) {
+    fn make_sut() -> (TempDir, FileManager) {
         let dir = setup_tempdir();
         let path = dir.path().to_path_buf();
         (
             dir,
-            FileManager::<ListState>::new(path).expect("failed to create file manager"),
+            FileManager::new(path).expect("failed to create file manager"),
         )
     }
 

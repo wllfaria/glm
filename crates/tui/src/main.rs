@@ -8,7 +8,7 @@ use std::panic;
 
 use app::App;
 use events::{Event, EventHandler};
-use glm::{FileManager, ListState};
+use glm::FileManager;
 
 use crossterm::terminal::{disable_raw_mode, enable_raw_mode};
 use crossterm::terminal::{EnterAlternateScreen, LeaveAlternateScreen};
@@ -16,7 +16,7 @@ use ratatui::{backend::CrosstermBackend, Terminal};
 
 fn main() -> anyhow::Result<()> {
     let path = crate::cli::parse();
-    let file_manager = FileManager::<ListState>::new(path)?;
+    let file_manager = FileManager::new(path)?;
 
     setup_terminal()?;
 
