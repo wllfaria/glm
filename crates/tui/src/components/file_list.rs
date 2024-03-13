@@ -210,6 +210,9 @@ impl Component for FileListComponent {
 
     fn resize(&mut self, bounds: Rect) -> anyhow::Result<()> {
         self.bounds = bounds;
+        if self.pos.y >= self.bounds.height {
+            self.pos.y = self.bounds.height - 1;
+        }
         self.draw_cursor()?;
         Ok(())
     }

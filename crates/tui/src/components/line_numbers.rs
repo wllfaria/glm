@@ -25,10 +25,10 @@ impl LineNumbersComponent {
 
     fn compose_list(&self) -> Vec<Span> {
         let mut lines = vec![];
-        let mut starting_line = self.scroll + 1;
-        for i in 0..self.bounds.height as usize {
-            if i < self.total_lines {
-                let line = starting_line.to_string();
+        let mut starting_line = self.scroll;
+        for _ in 0..self.bounds.height as usize {
+            if starting_line < self.total_lines as u16 {
+                let line = (starting_line + 1).to_string();
                 let line = format!("{}{}", " ".repeat(3 - line.len()), line);
                 lines.push(line.gray().dim());
                 starting_line += 1;
