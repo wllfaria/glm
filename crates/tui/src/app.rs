@@ -29,7 +29,7 @@ impl App {
             is_running: true,
             file_manager,
             is_help_open: false,
-            line_numbers: LineNumbersComponent::new(list.len(), size),
+            line_numbers: LineNumbersComponent::new(list.len(), size, 0),
             file_list: FileListComponent::new(list, size),
             help_pane: HelpComponent::new(),
         })
@@ -65,6 +65,8 @@ impl App {
 
         self.file_list.resize(list)?;
         self.line_numbers.resize(line_numbers)?;
+        self.line_numbers
+            .update(self.file_list.items.len(), self.file_list.scroll);
         self.line_numbers.draw(f, line_numbers)?;
         self.file_list.draw(f, list)?;
         Ok(())
@@ -96,7 +98,7 @@ impl App {
         match list_item.item.file_type {
             FileType::Directory => {
                 let new_state = self.file_manager.change_dir(&list_item.item.file_path)?;
-                self.line_numbers.update(new_state.items.len());
+                self.line_numbers.update(new_state.items.len(), 0);
                 self.file_list.update(new_state.items.clone())?;
             }
             _ => todo!(), // TODO: we should open the file here
@@ -108,7 +110,7 @@ impl App {
         let path = self.file_manager.get_state().current_dir.clone();
         if let Some(parent) = path.parent() {
             let new_state = self.file_manager.change_dir(parent)?;
-            self.line_numbers.update(new_state.items.len());
+            self.line_numbers.update(new_state.items.len(), 0);
             self.file_list.update(new_state.items.clone())?;
         }
         Ok(())
@@ -121,7 +123,7 @@ impl App {
     fn toggle_hidden(&mut self) -> anyhow::Result<()> {
         self.file_manager.toggle_hidden()?;
         let items = self.file_manager.get_state().items.to_vec();
-        self.line_numbers.update(items.len());
+        self.line_numbers.update(items.len(), 0);
         self.file_list.update(items)?;
         Ok(())
     }

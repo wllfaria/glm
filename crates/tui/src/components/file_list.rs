@@ -25,11 +25,11 @@ pub struct ListItem {
 
 #[derive(Debug)]
 pub struct FileListComponent {
-    items: Vec<ListItem>,
+    pub items: Vec<ListItem>,
     bounds: Rect,
     last_pos: Option<Position>,
     pos: Position,
-    scroll: u16,
+    pub scroll: u16,
 }
 
 fn format_names(items: Vec<Item>) -> Vec<ListItem> {

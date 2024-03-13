@@ -6,27 +6,32 @@ use super::Component;
 pub struct LineNumbersComponent {
     total_lines: usize,
     bounds: Rect,
+    scroll: u16,
 }
 
 impl LineNumbersComponent {
-    pub fn new(total_lines: usize, size: Rect) -> Self {
+    pub fn new(total_lines: usize, size: Rect, scroll: u16) -> Self {
         Self {
+            scroll,
             total_lines,
             bounds: size,
         }
     }
 
-    pub fn update(&mut self, total_lines: usize) {
+    pub fn update(&mut self, total_lines: usize, scroll: u16) {
+        self.scroll = scroll;
         self.total_lines = total_lines;
     }
 
     fn compose_list(&self) -> Vec<Span> {
         let mut lines = vec![];
+        let mut starting_line = self.scroll + 1;
         for i in 0..self.bounds.height as usize {
             if i < self.total_lines {
-                let line = (i + 1).to_string();
+                let line = starting_line.to_string();
                 let line = format!("{}{}", " ".repeat(3 - line.len()), line);
                 lines.push(line.gray().dim());
+                starting_line += 1;
                 continue;
             }
             lines.push("~".magenta().dim());
